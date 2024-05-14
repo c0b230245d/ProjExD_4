@@ -252,6 +252,25 @@ class Gravity(pg.sprite.Sprite):
         self.image.set_alpha(128)
         self.rect = self.image.get_rect()
 
+class Shield(pg.sprite.Sprite):
+    """
+    防御壁に関するクラス    
+    """
+    def __init__(self, bird : Bird, life : int):
+        super().__init__()
+        self.life = life
+        x, y = 20, bird.rect.height*2
+        self.image = pg.Surface((x, y))
+        color = (0, 0, 255)
+        pg.draw.rect(self.image, color, (0, 0, x, y))
+        self.vx, self.vy = bird.dire
+        self.angle = math.degrees(math.atan2(-self.vy, self.vx))
+        self.image = pg.transform.rotozoom(self.image, self.angle, 1.0)
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.centery = bird.rect.centery+bird.rect.height*bird.dire[1]
+        self.rect.centerx = bird.rect.centerx+bird.rect.width*bird.dire[0]
+
     def update(self):
         self.life -= 1
         if self.life < 0:
@@ -303,6 +322,7 @@ def main():
     exps = pg.sprite.Group()
     emys = pg.sprite.Group()
     gravitys = pg.sprite.Group()
+    shields = pg.sprite.Group()
 
     tmr = 0
     clock = pg.time.Clock()
@@ -318,12 +338,14 @@ def main():
                 if score.value > 20:
                     EMP(emys, bombs, screen)
                     score.value-=20
-         
             if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
                 if score.value >= 200:
                     score.value -= 200
                     gravitys.add(Gravity(400))
-
+            if event.type == pg.KEYDOWN and event.key == pg.K_v:
+                if score.value >= 50 and len(shields) == 0:
+                    score.value -= 50
+                    shields.add(Shield(bird, 400))
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
@@ -345,8 +367,12 @@ def main():
         
         for emy in pg.sprite.groupcollide(emys, gravitys, True, False).keys():
             exps.add(Explosion(emy, 50))
-            score.value += 1
+            score.value += 10
         for bomb in pg.sprite.groupcollide(bombs, gravitys, True, False).keys():
+            exps.add(Explosion(bomb, 50))
+            score.value += 1
+
+        for bomb in pg.sprite.groupcollide(bombs, shields, True, False).keys():
             exps.add(Explosion(bomb, 50))
             score.value += 1
 
@@ -370,8 +396,6 @@ def main():
                 time.sleep(2)
                 return
             
-
-
         for bomb in pg.sprite.spritecollide(bird, bombs, True):
             if bomb.state == "inactive":
                 continue
@@ -381,8 +405,6 @@ def main():
             time.sleep(2)
             return
 
-        bird.update(key_lst, screen)
-
         bird.update(key_lst, screen, score)
 
         beams.update()
@@ -391,6 +413,8 @@ def main():
         emys.draw(screen)
         bombs.update()
         bombs.draw(screen)
+        shields.update()
+        shields.draw(screen)
         exps.update()
         exps.draw(screen)
         gravitys.update()
