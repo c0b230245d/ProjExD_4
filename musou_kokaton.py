@@ -6,7 +6,7 @@ import time
 import pygame as pg
 
 
-WIDTH, HEIGHT = 1600, 900  # ゲームウィンドウの幅，高さ
+WIDTH, HEIGHT = 1000, 600  # ゲームウィンドウの幅，高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -96,9 +96,16 @@ class Bird(pg.sprite.Sprite):
             if key_lst[k]:
                 sum_mv[0] += mv[0]
                 sum_mv[1] += mv[1]
+        key_lst = pg.key.get_pressed()
+              
         self.rect.move_ip(self.speed*sum_mv[0], self.speed*sum_mv[1])
         if check_bound(self.rect) != (True, True):
             self.rect.move_ip(-self.speed*sum_mv[0], -self.speed*sum_mv[1])
+        if key_lst[pg.K_LSHIFT]:   #左シフトキーが押されたら
+            self.rect.move_ip(2*self.speed*sum_mv[0], 2*self.speed*sum_mv[1])  #コウカトンの速度を2倍    
+            if check_bound(self.rect) != (True, True):
+                self.rect.move_ip(2*-self.speed*sum_mv[0], 2*-self.speed*sum_mv[1])
+
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
             self.dire = tuple(sum_mv)
             self.image = self.imgs[self.dire]
