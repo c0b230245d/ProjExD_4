@@ -92,6 +92,9 @@ class Bird(pg.sprite.Sprite):
             if key_lst[k]:
                 sum_mv[0] += mv[0]
                 sum_mv[1] += mv[1]
+        key_lst = pg.key.get_pressed()
+        if key_lst[pg.K_LSHIFT]:   #左シフトキーが押されたら
+            self.rect.move_ip(2*self.speed*sum_mv[0], 2*self.speed*sum_mv[1])  #コウカトンの速度を2倍      
         self.rect.move_ip(self.speed*sum_mv[0], self.speed*sum_mv[1])
         if check_bound(self.rect) != (True, True):
             self.rect.move_ip(-self.speed*sum_mv[0], -self.speed*sum_mv[1])
