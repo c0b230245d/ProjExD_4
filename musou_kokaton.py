@@ -109,7 +109,7 @@ class Bird(pg.sprite.Sprite):
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
             self.dire = tuple(sum_mv)
             self.image = self.imgs[self.dire]
-        if key_lst[pg.K_RSHIFT] and score.value > 100:
+        if key_lst[pg.K_RSHIFT] and score.value >= 100:
             score.value -= 100  # スコアを100消費
             self.state = "hyper"
             self.hyper_life = 500  # 発動時間
@@ -400,14 +400,7 @@ def main():
             exps.add(Explosion(bomb, 50))
             score.value += 1
 
-        if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
-            bird.change_img(8, screen) # こうかとん悲しみエフェクト
-            score.update(screen)
-            pg.display.update()
-            time.sleep(2)
-            return
-
-        # bird.update(key_lst, screen, score)
+        bird.update(key_lst, screen, score)
             
         for bomb in pg.sprite.spritecollide(bird, bombs, True):
             if bird.state == "hyper":
@@ -428,8 +421,6 @@ def main():
             pg.display.update()
             time.sleep(2)
             return
-
-        bird.update(key_lst, screen, score)
 
         beams.update()
         beams.draw(screen)
