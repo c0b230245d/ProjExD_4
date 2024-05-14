@@ -6,7 +6,7 @@ import time
 import pygame as pg
 
 
-WIDTH, HEIGHT = 1600, 900  # ゲームウィンドウの幅，高さ
+WIDTH, HEIGHT = 1000, 600  # ゲームウィンドウの幅，高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -100,7 +100,6 @@ class Bird(pg.sprite.Sprite):
             self.image = self.imgs[self.dire]
         screen.blit(self.image, self.rect)
 
-
 class Bomb(pg.sprite.Sprite):
     """
     爆弾に関するクラス
@@ -125,6 +124,7 @@ class Bomb(pg.sprite.Sprite):
         self.rect.centerx = emy.rect.centerx
         self.rect.centery = emy.rect.centery+emy.rect.height/2
         self.speed = 6
+        self.state="active"
 
     def update(self):
         """
@@ -240,7 +240,22 @@ class Score:
         self.image = self.font.render(f"Score: {self.value}", 0, self.color)
         screen.blit(self.image, self.rect)
 
-
+#empに関するクラス
+class EMP():
+    def __init__(self,emys: pg.sprite.Group ,bombs: pg.sprite.Group, screen : pg.Surface):
+        for emy in emys:
+            emy.interval = math.inf
+            emy.image=pg.transform.laplacian(emy.image)
+            emy.image.set_colorkey((0,0,0))
+        for bomb in bombs:
+            bomb.speed/=2
+            bomb.state="inactive"
+        
+        
+class color():
+    def __init__(self):
+        self.image=pg.Surface((1000, 600))
+        pg.draw.rect(self.image,(255, 255, 255),(0, 0), )
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -262,6 +277,11 @@ def main():
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
+            if event.type == pg.KEYDOWN and event.key == pg.K_e:
+                if score.value > 20:
+                    EMP(emys, bombs, screen)
+                    score.value-=20
+                    
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
@@ -281,7 +301,9 @@ def main():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
             score.value += 1  # 1点アップ
 
-        if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
+        for bomb in pg.sprite.spritecollide(bird, bombs, True):
+            if bomb.state == "inactive":
+                continue
             bird.change_img(8, screen) # こうかとん悲しみエフェクト
             score.update(screen)
             pg.display.update()
