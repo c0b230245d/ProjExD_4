@@ -230,17 +230,17 @@ class Shield(pg.sprite.Sprite):
     def __init__(self, bird : Bird, life : int):
         super().__init__()
         self.life = life
-        x, y = bird.rect.width*2, bird.rect.height*2
+        x, y = 20, bird.rect.height*2
         self.image = pg.Surface((x, y))
         color = (0, 0, 255)
-        pg.draw.rect(self.image, color, (x-10, 0, x+10, y))
+        pg.draw.rect(self.image, color, (0, 0, x, y))
         self.vx, self.vy = bird.dire
         self.angle = math.degrees(math.atan2(-self.vy, self.vx))
         self.image = pg.transform.rotozoom(self.image, self.angle, 1.0)
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.centery = bird.rect.centery+bird.rect.height/2*bird.dire[1]
-        self.rect.centerx = bird.rect.centerx+bird.rect.width/2*bird.dire[0]
+        self.rect.centery = bird.rect.centery+bird.rect.height*bird.dire[1]
+        self.rect.centerx = bird.rect.centerx+bird.rect.width*bird.dire[0]
 
     def update(self):
         self.life -= 1
@@ -289,7 +289,8 @@ def main():
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
             if event.type == pg.KEYDOWN and event.key == pg.K_v:
-                if score.value <= 50 and len(shields) == 0:
+                if score.value >= 50 and len(shields) == 0:
+                    score.value -= 50
                     shields.add(Shield(bird, 400))
         screen.blit(bg_img, [0, 0])
 
